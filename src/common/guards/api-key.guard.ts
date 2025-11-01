@@ -9,7 +9,7 @@ import { Request } from 'express';
 
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
-  private readonly validApiKey = process.env.API_KEY || 'DEXCHANGE-API-KEY-2025-TEST-SECURE';
+  private readonly validApiKey = process.env.API_KEY;
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();

@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
-import { Transfer, TransferStatus, TransferChannel } from './transfers/entities/transfer.entity';
-import { AuditLog, AuditAction } from './audit/entities/audit-log.entity';
+import { TransferStatus, TransferChannel } from './transfers/entities/transfer.entity';
+import { AuditAction } from './audit/entities/audit-log.entity';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/dexchange-transfers';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://babacd345:passer123@dexchange-transfers.vzmfpv8.mongodb.net/?appName=dexchange-transfers';
 
 async function seed() {
   try {

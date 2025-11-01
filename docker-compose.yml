@@ -1,17 +1,6 @@
 version: '3.8'
 
 services:
-  mongodb:
-    image: mongo:7
-    container_name: dexchange-mongodb
-    restart: always
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-    environment:
-      MONGO_INITDB_DATABASE: dexchange-transfers
-
   app:
     build:
       context: .
@@ -23,12 +12,6 @@ services:
     environment:
       PORT: 3000
       NODE_ENV: production
-      MONGODB_URI: mongodb://mongodb:27017/dexchange-transfers
-      API_KEY: DEXCHANGE-API-KEY-2025-TEST-SECURE
-    depends_on:
-      - mongodb
-    volumes:
-      - ./src:/app/src
-
-volumes:
-  mongodb_data:
+      # Utilise MongoDB Atlas (cloud)
+      MONGODB_URI: mongodb+srv://babacd345:passer123@dexchange-transfers.vzmfpv8.mongodb.net/?appName=dexchange-transfers
+      API_KEY: clé

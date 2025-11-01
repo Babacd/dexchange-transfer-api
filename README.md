@@ -20,12 +20,7 @@ npm install
 
 # 3. Configurer l'environnement
 cp .env.example .env
-# Éditer .env si nécessaire (MongoDB URI, API Key)
-
-# 4. Démarrer MongoDB
-# Option Docker :
-docker run -d -p 27017:27017 --name mongodb mongo:latest
-# Ou installer MongoDB localement
+# Le projet utilise MongoDB Atlas (cloud) - URI déjà configuré dans .env.example
 ```
 
 ### Commandes
@@ -50,7 +45,7 @@ npm run seed
 **URL de l'application** : http://localhost:3000  
 **Documentation Swagger** : http://localhost:3000/docs
 
-⚠️ **Tous les endpoints nécessitent le header** : `x-api-key: DEXCHANGE-API-KEY-2025-TEST-SECURE`
+⚠️ **Tous les endpoints nécessitent le header** : `x-api-key: clé`
 
 ---
 
@@ -63,7 +58,7 @@ npm run seed
 ```bash
 curl -X POST http://localhost:3000/transfers \
   -H "Content-Type: application/json" \
-  -H "x-api-key: DEXCHANGE-API-KEY-2025-TEST-SECURE" \
+  -H "x-api-key: clé" \
   -d '{
     "amount": 12500,
     "currency": "XOF",
@@ -102,7 +97,7 @@ curl -X POST http://localhost:3000/transfers \
 
 ```bash
 curl -X GET "http://localhost:3000/transfers?status=PENDING&limit=10" \
-  -H "x-api-key: DEXCHANGE-API-KEY-2025-TEST-SECURE"
+  -H "x-api-key: clé"
 ```
 
 **Filtres disponibles** : `status`, `channel`, `minAmount`, `maxAmount`, `q`, `limit`, `cursor`
@@ -121,7 +116,7 @@ curl -X GET "http://localhost:3000/transfers?status=PENDING&limit=10" \
 
 ```bash
 curl -X GET http://localhost:3000/transfers/654abc123... \
-  -H "x-api-key: DEXCHANGE-API-KEY-2025-TEST-SECURE"
+  -H "x-api-key: clé"
 ```
 
 Retourne le transfert complet ou 404.
@@ -132,7 +127,7 @@ Retourne le transfert complet ou 404.
 
 ```bash
 curl -X POST http://localhost:3000/transfers/654abc123.../process \
-  -H "x-api-key: DEXCHANGE-API-KEY-2025-TEST-SECURE"
+  -H "x-api-key: clé"
 ```
 
 **Logique** :
@@ -150,7 +145,7 @@ curl -X POST http://localhost:3000/transfers/654abc123.../process \
 
 ```bash
 curl -X POST http://localhost:3000/transfers/654abc123.../cancel \
-  -H "x-api-key: DEXCHANGE-API-KEY-2025-TEST-SECURE"
+  -H "x-api-key: clé"
 ```
 
 **Règle** : Seuls les transferts `PENDING` peuvent être annulés (sinon 409).

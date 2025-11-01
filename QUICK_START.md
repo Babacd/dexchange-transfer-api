@@ -84,7 +84,7 @@ docker-compose down
 curl http://localhost:3000/transfers
 
 # Avec API Key (devrait fonctionner)
-curl -H "x-api-key: DEXCHANGE-API-KEY-2025-TEST-SECURE" http://localhost:3000/transfers
+curl -H "x-api-key: clé" http://localhost:3000/transfers
 ```
 
 ### Créer un transfert
@@ -92,7 +92,7 @@ curl -H "x-api-key: DEXCHANGE-API-KEY-2025-TEST-SECURE" http://localhost:3000/tr
 ```bash
 curl -X POST http://localhost:3000/transfers \
   -H "Content-Type: application/json" \
-  -H "x-api-key: DEXCHANGE-API-KEY-2025-TEST-SECURE" \
+  -H "x-api-key: clé" \
   -d '{
     "amount": 12500,
     "currency": "XOF",
@@ -175,7 +175,7 @@ PORT=3001
 
 Vérifier l'URI dans `.env` :
 ```
-MONGODB_URI=mongodb://localhost:27017/dexchange-transfers
+MONGODB_URI=mongodb+srv://babacd345:passer123@dexchange-transfers.vzmfpv8.mongodb.net/?appName=dexchange-transfers
 ```
 
 ---
@@ -183,5 +183,5 @@ MONGODB_URI=mongodb://localhost:27017/dexchange-transfers
 ## 🎯 Prochaines étapes
 
 1. Ouvrir Swagger : http://localhost:3000/docs
-2. Tester les endpoints avec l'API Key : `DEXCHANGE-API-KEY-2025-TEST-SECURE`
+2. Tester les endpoints avec l'API Key : `clé`
 3. Consulter le README.md pour les détails complets
