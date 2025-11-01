@@ -6,7 +6,7 @@ import { AuditModule } from './audit/audit.module';
 @Module({
   imports: [
     MongooseModule.forRoot(
-      process.env.MONGODB_URI || 'mongodb://localhost:27017/dexchange-transfers',
+      process.env.MONGODB_URI || 'mongodb+srv://babacd345:passer123@dexchange-transfers.vzmfpv8.mongodb.net/?appName=dexchange-transfers',
     ),
     TransfersModule,
     AuditModule,
