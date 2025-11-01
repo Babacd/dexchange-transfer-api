@@ -25,7 +25,7 @@ async function bootstrap() {
         type: 'apiKey',
         name: 'x-api-key',
         in: 'header',
-        description: 'API Key pour l\'authentification',
+        description: "API Key pour l'authentification",
       },
       'api-key',
     )
@@ -36,7 +36,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  
+
   console.log(`🚀 Application démarrée sur le port ${port}`);
   console.log(`📘 Documentation Swagger disponible sur http://localhost:${port}/docs`);
 }

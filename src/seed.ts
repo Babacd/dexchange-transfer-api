@@ -125,10 +125,18 @@ async function seed() {
 
     console.log('\n🎉 Seed terminé avec succès !');
     console.log(`📊 Statistiques :`);
-    console.log(`   - Transferts PENDING: ${transfers.filter((t) => t.status === TransferStatus.PENDING).length}`);
-    console.log(`   - Transferts SUCCESS: ${transfers.filter((t) => t.status === TransferStatus.SUCCESS).length}`);
-    console.log(`   - Transferts FAILED: ${transfers.filter((t) => t.status === TransferStatus.FAILED).length}`);
-    console.log(`   - Transferts CANCELED: ${transfers.filter((t) => t.status === TransferStatus.CANCELED).length}`);
+    console.log(
+      `   - Transferts PENDING: ${transfers.filter((t) => t.status === TransferStatus.PENDING).length}`,
+    );
+    console.log(
+      `   - Transferts SUCCESS: ${transfers.filter((t) => t.status === TransferStatus.SUCCESS).length}`,
+    );
+    console.log(
+      `   - Transferts FAILED: ${transfers.filter((t) => t.status === TransferStatus.FAILED).length}`,
+    );
+    console.log(
+      `   - Transferts CANCELED: ${transfers.filter((t) => t.status === TransferStatus.CANCELED).length}`,
+    );
 
     await mongoose.disconnect();
   } catch (error) {

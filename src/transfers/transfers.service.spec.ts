@@ -83,7 +83,7 @@ describe('TransfersService', () => {
     });
   });
 
-  describe('Transitions d\'état', () => {
+  describe("Transitions d'état", () => {
     it('devrait passer de PENDING à PROCESSING puis SUCCESS', async () => {
       const mockTransfer: any = {
         _id: '123',

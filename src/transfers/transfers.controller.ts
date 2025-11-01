@@ -9,13 +9,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiSecurity,
-  ApiParam,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiSecurity, ApiParam } from '@nestjs/swagger';
 import { TransfersService } from './transfers.service';
 import { CreateTransferDto } from './dto/create-transfer.dto';
 import { QueryTransferDto } from './dto/query-transfer.dto';
@@ -100,7 +94,7 @@ export class TransfersController {
 
   @Post(':id/process')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Simuler le traitement d\'un transfert' })
+  @ApiOperation({ summary: "Simuler le traitement d'un transfert" })
   @ApiParam({ name: 'id', description: 'ID du transfert' })
   @ApiResponse({
     status: 200,

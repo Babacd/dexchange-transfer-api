@@ -17,7 +17,7 @@ export class ProviderSimulator {
     await this.delay(2000 + Math.random() * 1000);
 
     const random = Math.random();
-    
+
     // 70% de réussite
     if (random < 0.7) {
       return {
@@ -25,7 +25,7 @@ export class ProviderSimulator {
         provider_ref: this.generateProviderRef(),
       };
     }
-    
+
     // 30% d'échec
     return {
       success: false,
@@ -47,12 +47,12 @@ export class ProviderSimulator {
       'TIMEOUT',
       'PROVIDER_UNAVAILABLE',
     ];
-    
+
     const randomIndex = Math.floor(Math.random() * errorCodes.length);
     return errorCodes[randomIndex];
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

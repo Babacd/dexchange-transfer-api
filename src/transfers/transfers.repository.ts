@@ -78,8 +78,6 @@ export class TransfersRepository {
   }
 
   async update(id: string, updateData: Partial<Transfer>): Promise<Transfer | null> {
-    return this.transferModel
-      .findByIdAndUpdate(id, updateData, { new: true })
-      .exec();
+    return this.transferModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
   }
 }

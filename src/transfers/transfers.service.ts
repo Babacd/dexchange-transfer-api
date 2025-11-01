@@ -55,7 +55,7 @@ export class TransfersService {
 
   async findOne(id: string): Promise<Transfer> {
     const transfer = await this.transfersRepository.findById(id);
-    
+
     if (!transfer) {
       throw new NotFoundException(`Transfer avec l'id ${id} introuvable`);
     }
@@ -171,10 +171,8 @@ export class TransfersService {
    * Vérifie si un statut est final
    */
   private isFinalStatus(status: TransferStatus): boolean {
-    return [
-      TransferStatus.SUCCESS,
-      TransferStatus.FAILED,
-      TransferStatus.CANCELED,
-    ].includes(status);
+    return [TransferStatus.SUCCESS, TransferStatus.FAILED, TransferStatus.CANCELED].includes(
+      status,
+    );
   }
 }

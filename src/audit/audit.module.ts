@@ -4,9 +4,7 @@ import { AuditService } from './audit.service';
 import { AuditLog, AuditLogSchema } from './entities/audit-log.entity';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([{ name: AuditLog.name, schema: AuditLogSchema }]),
-  ],
+  imports: [MongooseModule.forFeature([{ name: AuditLog.name, schema: AuditLogSchema }])],
   providers: [AuditService],
   exports: [AuditService],
 })

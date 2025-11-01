@@ -1,4 +1,12 @@
-import { IsNumber, IsString, IsObject, IsOptional, IsEnum, Min, ValidateNested } from 'class-validator';
+import {
+  IsNumber,
+  IsString,
+  IsObject,
+  IsOptional,
+  IsEnum,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { TransferChannel } from '../entities/transfer.entity';

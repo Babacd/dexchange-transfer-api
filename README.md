@@ -1,133 +1,62 @@
-# 🚀 DEXCHANGE Transfer API - Test Backend NestJS
+# DEXCHANGE Transfer API
 
 API de gestion de transferts avec authentification par API Key, règles métier, simulation de traitement, pagination cursor-based et logs d'audit.
 
-## 📋 Table des matières
-
-- [Technologies](#technologies)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Démarrage](#démarrage)
-- [Documentation API](#documentation-api)
-- [Routes & Exemples](#routes--exemples)
-- [Flow de traitement](#flow-de-traitement)
-- [Architecture](#architecture)
-- [Tests](#tests)
-- [Choix techniques](#choix-techniques)
-- [Améliorations futures](#améliorations-futures)
+**Stack** : NestJS + TypeScript + MongoDB + Swagger
 
 ---
 
-## 🛠 Technologies
+## Setup & Commandes
 
-- **NestJS 10** - Framework Node.js progressif
-- **TypeScript** - Typage statique
-- **MongoDB** avec **Mongoose** - Base de données NoSQL
-- **Swagger** - Documentation interactive de l'API
-- **Jest** - Tests unitaires
-- **Class-validator & Class-transformer** - Validation des DTOs
-
----
-
-## 📦 Installation
+### Installation
 
 ```bash
-# Installer les dépendances
+# 1. Cloner le projet
+git clone https://github.com/Babacd/dexchange-transfer-api.git
+cd dexchange-transfer-api
+
+# 2. Installer les dépendances
 npm install
-```
 
----
-
-## ⚙️ Configuration
-
-1. Copier le fichier d'exemple d'environnement :
-
-```bash
+# 3. Configurer l'environnement
 cp .env.example .env
-```
+# Éditer .env si nécessaire (MongoDB URI, API Key)
 
-2. Configurer les variables dans `.env` :
-
-```env
-# Application
-PORT=3000
-NODE_ENV=development
-
-# MongoDB
-MONGODB_URI=mongodb://localhost:27017/dexchange-transfers
-
-# API Key
-API_KEY=DEXCHANGE-API-KEY-2025-TEST-SECURE
-```
-
-### Prérequis MongoDB
-
-L'application nécessite MongoDB. Options :
-
-**Option 1 : MongoDB local**
-```bash
-# Installer MongoDB localement
-# Windows : https://www.mongodb.com/try/download/community
-# Mac : brew install mongodb-community
-# Linux : apt-get install mongodb
-
-# Démarrer MongoDB
-mongod
-```
-
-**Option 2 : MongoDB Atlas (Cloud)**
-- Créer un compte sur [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
-- Créer un cluster gratuit
-- Récupérer l'URI de connexion
-- Mettre à jour `MONGODB_URI` dans `.env`
-
-**Option 3 : Docker**
-```bash
+# 4. Démarrer MongoDB
+# Option Docker :
 docker run -d -p 27017:27017 --name mongodb mongo:latest
+# Ou installer MongoDB localement
 ```
 
----
-
-## 🚀 Démarrage
+### Commandes
 
 ```bash
-# Mode développement (avec hot-reload)
+# Démarrer en mode développement
 npm run start:dev
 
-# Mode production
+# Build
 npm run build
+
+# Démarrer en production
 npm run start:prod
 
-# Mode debug
-npm run start:debug
+# Tests unitaires
+npm test
+
+# (Bonus) Populer la base avec des données de test
+npm run seed
 ```
 
-L'application démarre sur `http://localhost:3000`
+**URL de l'application** : http://localhost:3000  
+**Documentation Swagger** : http://localhost:3000/docs
+
+⚠️ **Tous les endpoints nécessitent le header** : `x-api-key: DEXCHANGE-API-KEY-2025-TEST-SECURE`
 
 ---
 
-## 📘 Documentation API
+## Routes & Exemples
 
-La documentation Swagger est accessible sur :
-
-```
-http://localhost:3000/docs
-```
-
-🔑 **Important** : Tous les endpoints nécessitent le header `x-api-key`
-
----
-
-## 🛣 Routes & Exemples
-
-### Authentication
-
-Tous les endpoints requièrent le header :
-```
-x-api-key: DEXCHANGE-API-KEY-2025-TEST-SECURE
-```
-
-### 1️⃣ Créer un transfert
+### 1. Créer un transfert
 
 **POST** `/transfers`
 
@@ -152,422 +81,278 @@ curl -X POST http://localhost:3000/transfers \
 **Réponse (201)** :
 ```json
 {
-  "_id": "654abc123def456789012345",
+  "_id": "654abc123...",
   "reference": "TRF-20250101-A3B2",
   "amount": 12500,
-  "currency": "XOF",
-  "channel": "WAVE",
-  "recipient": {
-    "phone": "+221770000000",
-    "name": "Jane Doe"
-  },
-  "metadata": {
-    "orderId": "ABC-123"
-  },
   "fees": 100,
   "total": 12600,
   "status": "PENDING",
-  "createdAt": "2025-01-01T12:00:00.000Z",
-  "updatedAt": "2025-01-01T12:00:00.000Z"
+  ...
 }
 ```
 
-**Règles métier appliquées** :
-- Génération automatique de `reference` : `TRF-YYYYMMDD-XXXX`
-- Calcul des frais : **0.8%** du montant (arrondi au supérieur)
-- Frais minimum : **100 XOF**
-- Frais maximum : **1500 XOF**
-- Statut initial : **PENDING**
+**Règles métier** :
+- Référence unique : `TRF-YYYYMMDD-XXXX`
+- Frais : 0.8% arrondi au supérieur (min: 100, max: 1500)
+- Statut initial : `PENDING`
 
----
+### 2. Lister les transferts (pagination cursor-based)
 
-### 2️⃣ Lister les transferts (avec pagination)
-
-**GET** `/transfers?limit=10&status=PENDING&channel=WAVE`
+**GET** `/transfers?status=PENDING&limit=10`
 
 ```bash
-curl -X GET "http://localhost:3000/transfers?limit=10&status=PENDING" \
+curl -X GET "http://localhost:3000/transfers?status=PENDING&limit=10" \
   -H "x-api-key: DEXCHANGE-API-KEY-2025-TEST-SECURE"
 ```
 
-**Filtres disponibles** :
-- `status` : PENDING, PROCESSING, SUCCESS, FAILED, CANCELED
-- `channel` : WAVE, OM
-- `minAmount` : Montant minimum
-- `maxAmount` : Montant maximum
-- `q` : Recherche dans reference ou nom du destinataire
-- `limit` : Nombre de résultats (max 50, défaut 20)
-- `cursor` : Cursor pour la page suivante
+**Filtres disponibles** : `status`, `channel`, `minAmount`, `maxAmount`, `q`, `limit`, `cursor`
 
-**Réponse (200)** :
+**Réponse** :
 ```json
 {
-  "items": [
-    {
-      "_id": "654abc123def456789012345",
-      "reference": "TRF-20250101-A3B2",
-      "amount": 12500,
-      "status": "PENDING",
-      "channel": "WAVE",
-      ...
-    }
-  ],
-  "nextCursor": "654abc123def456789012346"
+  "items": [...],
+  "nextCursor": "654abc123..."
 }
 ```
 
-**Pour la page suivante** :
-```bash
-curl -X GET "http://localhost:3000/transfers?limit=10&cursor=654abc123def456789012346" \
-  -H "x-api-key: DEXCHANGE-API-KEY-2025-TEST-SECURE"
-```
-
----
-
-### 3️⃣ Récupérer un transfert
+### 3. Récupérer un transfert
 
 **GET** `/transfers/:id`
 
 ```bash
-curl -X GET http://localhost:3000/transfers/654abc123def456789012345 \
+curl -X GET http://localhost:3000/transfers/654abc123... \
   -H "x-api-key: DEXCHANGE-API-KEY-2025-TEST-SECURE"
 ```
 
-**Réponse (200)** : Objet transfert complet
+Retourne le transfert complet ou 404.
 
-**Erreurs** :
-- **404** : Transfert introuvable
-
----
-
-### 4️⃣ Traiter un transfert (simulation)
+### 4. Traiter un transfert (simulation)
 
 **POST** `/transfers/:id/process`
 
 ```bash
-curl -X POST http://localhost:3000/transfers/654abc123def456789012345/process \
+curl -X POST http://localhost:3000/transfers/654abc123.../process \
   -H "x-api-key: DEXCHANGE-API-KEY-2025-TEST-SECURE"
 ```
 
-**Comportement** :
-1. Vérifie que le statut n'est pas final (SUCCESS, FAILED, CANCELED)
-2. Passe le statut à **PROCESSING**
-3. Simule le traitement (délai 2-3 secondes)
-4. **70% de réussite** → statut **SUCCESS** + `provider_ref`
-5. **30% d'échec** → statut **FAILED** + `error_code`
+**Logique** :
+1. Vérifie que le statut n'est pas final (`SUCCESS`, `FAILED`, `CANCELED`)
+2. Passe à `PROCESSING`
+3. Simule le traitement (2-3 secondes)
+4. **70%** → `SUCCESS` + `provider_ref`
+5. **30%** → `FAILED` + `error_code`
 
-**Réponse SUCCESS (200)** :
-```json
-{
-  "_id": "654abc123def456789012345",
-  "reference": "TRF-20250101-A3B2",
-  "status": "SUCCESS",
-  "provider_ref": "PROV-1704110400000-ABC123",
-  ...
-}
-```
+**Erreur 409** si statut déjà final.
 
-**Réponse FAILED (200)** :
-```json
-{
-  "_id": "654abc123def456789012345",
-  "reference": "TRF-20250101-A3B2",
-  "status": "FAILED",
-  "error_code": "NETWORK_ERROR",
-  ...
-}
-```
-
-**Erreurs** :
-- **404** : Transfert introuvable
-- **409** : Impossible de traiter un transfert avec statut final
-
----
-
-### 5️⃣ Annuler un transfert
+### 5. Annuler un transfert
 
 **POST** `/transfers/:id/cancel`
 
 ```bash
-curl -X POST http://localhost:3000/transfers/654abc123def456789012345/cancel \
+curl -X POST http://localhost:3000/transfers/654abc123.../cancel \
   -H "x-api-key: DEXCHANGE-API-KEY-2025-TEST-SECURE"
 ```
 
-**Règle** : Seuls les transferts avec statut **PENDING** peuvent être annulés.
-
-**Réponse (200)** :
-```json
-{
-  "_id": "654abc123def456789012345",
-  "reference": "TRF-20250101-A3B2",
-  "status": "CANCELED",
-  ...
-}
-```
-
-**Erreurs** :
-- **404** : Transfert introuvable
-- **409** : Seuls les transferts PENDING peuvent être annulés
+**Règle** : Seuls les transferts `PENDING` peuvent être annulés (sinon 409).
 
 ---
 
-## 🔄 Flow de traitement
+## Explication du Flow
 
-### Diagramme des états
+### Diagramme des transitions d'état
 
 ```
 ┌─────────┐
 │ PENDING │ ◄── Création du transfert
 └────┬────┘
      │
-     ├────► POST /cancel ────► ┌──────────┐
-     │                          │ CANCELED │
-     │                          └──────────┘
+     ├─► POST /cancel ──► CANCELED (état final)
      │
-     ├────► POST /process
-     │
-     ▼
-┌────────────┐
-│ PROCESSING │ ◄── Traitement en cours
-└─────┬──────┘
-      │
-      ├────► 70% ────► ┌─────────┐
-      │                │ SUCCESS │ (statut final)
-      │                └─────────┘
-      │
-      └────► 30% ────► ┌────────┐
-                       │ FAILED │ (statut final)
-                       └────────┘
+     └─► POST /process
+          │
+          ▼
+     ┌────────────┐
+     │ PROCESSING │
+     └─────┬──────┘
+           │
+           ├─► 70% ──► SUCCESS (état final) + provider_ref
+           │
+           └─► 30% ──► FAILED (état final) + error_code
 ```
 
-### États finaux
+**États finaux** (ne peuvent plus être modifiés) : `SUCCESS`, `FAILED`, `CANCELED`
 
-Les transferts avec ces statuts ne peuvent plus être modifiés :
-- ✅ **SUCCESS**
-- ❌ **FAILED**
-- 🚫 **CANCELED**
+### Logs d'audit
+
+Chaque action importante est tracée automatiquement :
+- `TRANSFER_CREATED` : Création du transfert
+- `TRANSFER_PROCESSING` : Début du traitement
+- `TRANSFER_SUCCESS` : Traitement réussi
+- `TRANSFER_FAILED` : Traitement échoué
+- `TRANSFER_CANCELED` : Annulation
+
+Les logs sont stockés dans une collection MongoDB séparée avec timestamp et métadonnées.
 
 ---
 
-## 🏗 Architecture
+## Choix techniques
+
+### 1. MongoDB avec Mongoose
+- **Pourquoi** : Flexibilité pour les métadonnées dynamiques, pas de migrations complexes
+- **Index** : Optimisation sur `reference`, `status`, `channel`, `amount`
+- **Adapté** : Pour un prototype rapide et évolutif
+
+### 2. Pagination Cursor-Based
+- **Pourquoi** : Plus performant que l'offset sur grandes collections
+- **Avantage** : Résultats cohérents même avec ajouts/suppressions concurrents
+- **Implémentation** : Utilise `_id` MongoDB comme cursor
+
+### 3. Architecture NestJS modulaire
+- **Séparation** : Controller (HTTP) / Service (logique métier) / Repository (données)
+- **Testabilité** : Injection de dépendances facilitant les mocks
+- **Réutilisabilité** : Modules indépendants (AuditModule, TransfersModule)
+
+### 4. Guard API Key
+- **Simplicité** : Adapté au scope du test
+- **Sécurité basique** : Distinction 401 (absent) vs 403 (invalide)
+- **Évolutif** : Facilement remplaçable par JWT/OAuth2
+
+### 5. Validation automatique (class-validator)
+- **Déclarative** : Validation sur les DTOs
+- **Type-safe** : Cohérence avec TypeScript
+- **Messages clairs** : Erreurs explicites pour le client
+
+### 6. Audit logs séparé
+- **Traçabilité** : Historique complet de chaque transfert
+- **Non-bloquant** : Les erreurs d'audit n'impactent pas le flux principal
+- **Indépendant** : Module réutilisable
+
+---
+
+## Ce que je ferais avec plus de temps
+
+### Sécurité
+- **JWT** avec refresh tokens au lieu d'API Key simple
+- **Rate limiting** pour protéger contre le spam/DDoS
+- **Hashing** des API keys en base de données
+- **Permissions granulaires** : différents niveaux d'accès
+- **CORS** configuré selon les environnements
+
+### Performance & Scalabilité
+- **Redis** pour cache des transferts fréquemment consultés
+- **PostgreSQL** en option avec TypeORM pour garantir ACID
+- **Index composés** optimisés pour requêtes complexes
+- **Transactions** pour garantir la cohérence
+
+### Fonctionnalités métier
+- **Multi-devises** avec taux de change dynamique
+- **Webhooks** pour notifier les systèmes externes des changements d'état
+- **Retry automatique** pour les transferts FAILED (avec backoff exponentiel)
+- **Notifications** SMS/Email au destinataire
+- **Scheduled jobs** : réconciliation, nettoyage des vieux transferts
+- **Vrais providers** : intégration Wave API, Orange Money API
+
+### Monitoring & Observabilité
+- **Prometheus + Grafana** : métriques temps réel (nombre de transferts, taux de succès, latence)
+- **Logging structuré** avec Winston ou Pino
+- **Alerting** : notifications si taux d'échec > seuil
+- **Distributed tracing** avec Jaeger/Zipkin
+- **Health checks** : endpoints `/health` et `/ready`
+
+### Tests & Qualité
+- **Tests E2E** complets avec vraie base MongoDB de test
+- **Tests d'intégration** avec les providers
+- **Tests de charge** avec K6 ou Artillery
+- **Coverage** > 90%
+- **CI/CD** : GitHub Actions avec déploiement automatique
+
+### DevOps & Infrastructure
+- **Docker Compose** complet (app + MongoDB + Redis)
+- **Kubernetes** : déploiement avec Helm charts
+- **Multi-environnements** : dev, staging, prod avec configs séparées
+- **Versioning API** : `/v1/transfers`, `/v2/transfers`
+- **Blue/Green deployment** pour zéro downtime
+
+### Provider System avancé
+- **Adapters séparés** : `WaveProvider`, `OrangeMoneyProvider` implémentant une interface commune
+- **Load balancing** : répartition intelligente entre providers selon leur disponibilité
+- **Fallback automatique** : si un provider est down, basculer sur un autre
+- **Circuit breaker** : arrêter temporairement les appels à un provider défaillant
+- **Monitoring par provider** : performances, taux de succès, coûts
+
+---
+
+## Tests
+
+### Exécution
+
+```bash
+# Tous les tests
+npm test
+
+# Mode watch
+npm run test:watch
+
+# Coverage
+npm run test:cov
+```
+
+### Tests implémentés (11 tests)
+
+✅ **Calcul des frais** :
+- Calcul à 0.8% arrondi au supérieur
+- Application du minimum (100)
+- Application du maximum (1500)
+
+✅ **Transitions d'état** :
+- PENDING → PROCESSING → SUCCESS
+- PENDING → PROCESSING → FAILED
+- Impossible de traiter un statut final
+- PENDING → CANCELED
+- Impossible d'annuler un statut non-PENDING
+
+---
+
+## Structure du projet
 
 ```
 src/
 ├── common/
 │   └── guards/
-│       └── api-key.guard.ts          # Guard d'authentification API Key
+│       └── api-key.guard.ts          # Authentification API Key
 ├── transfers/
-│   ├── dto/
-│   │   ├── create-transfer.dto.ts    # DTO de création
-│   │   └── query-transfer.dto.ts     # DTO de filtres/pagination
-│   ├── entities/
-│   │   └── transfer.entity.ts        # Schéma Mongoose
-│   ├── transfers.controller.ts       # Routes HTTP
+│   ├── dto/                          # DTOs avec validation
+│   ├── entities/                     # Schéma Mongoose Transfer
+│   ├── transfers.controller.ts       # Routes HTTP + Swagger
 │   ├── transfers.service.ts          # Logique métier
-│   ├── transfers.repository.ts       # Accès données
-│   ├── provider.simulator.ts         # Simulation provider
+│   ├── transfers.repository.ts       # Accès données + pagination
+│   ├── provider.simulator.ts         # Simulation traitement
 │   ├── transfers.module.ts           # Module NestJS
 │   └── transfers.service.spec.ts     # Tests unitaires
 ├── audit/
-│   ├── entities/
-│   │   └── audit-log.entity.ts       # Schéma logs d'audit
-│   ├── audit.service.ts              # Service d'audit
+│   ├── entities/                     # Schéma Mongoose AuditLog
+│   ├── audit.service.ts              # Logs d'audit
 │   └── audit.module.ts               # Module NestJS
 ├── app.module.ts                     # Module racine
-└── main.ts                           # Point d'entrée
-```
-
-### Responsabilités
-
-- **Controller** : Gestion des requêtes HTTP, validation, documentation Swagger
-- **Service** : Logique métier (calcul frais, transitions d'état, orchestration)
-- **Repository** : Accès base de données, requêtes, pagination
-- **Guard** : Authentification API Key
-- **Audit Service** : Traçabilité des actions
-- **Provider Simulator** : Simulation du traitement externe
-
----
-
-## 🧪 Tests
-
-```bash
-# Lancer tous les tests
-npm test
-
-# Tests en mode watch
-npm run test:watch
-
-# Couverture de code
-npm run test:cov
-```
-
-### Tests implémentés
-
-✅ **Calcul des frais** (`transfers.service.spec.ts`)
-- Calcul à 0.8% arrondi au supérieur
-- Application du minimum (100)
-- Application du maximum (1500)
-
-✅ **Transitions d'état** (`transfers.service.spec.ts`)
-- PENDING → PROCESSING → SUCCESS
-- PENDING → PROCESSING → FAILED
-- Vérification qu'un statut final ne peut pas être traité
-- PENDING → CANCELED
-- Vérification qu'un statut non-PENDING ne peut pas être annulé
-
----
-
-## 🎯 Choix techniques
-
-### 1. **MongoDB avec Mongoose**
-- **Pourquoi** : Flexibilité du schéma NoSQL pour les métadonnées dynamiques
-- **Avantage** : Pas de migrations complexes, adapté aux évolutions rapides
-- **Index** : Optimisation des recherches sur `reference`, `status`, `channel`, `amount`
-
-### 2. **Pagination Cursor-Based**
-- **Pourquoi** : Plus performant que l'offset pour grandes collections
-- **Avantage** : Résultats cohérents même avec ajouts/suppressions
-- **Implémentation** : Utilisation de `_id` MongoDB comme cursor
-
-### 3. **Architecture modulaire NestJS**
-- **Séparation des responsabilités** : Controller / Service / Repository
-- **Testabilité** : Injection de dépendances facilitant les mocks
-- **Réutilisabilité** : AuditModule indépendant et réutilisable
-
-### 4. **Guard API Key**
-- **Simplicité** : Solution adaptée au scope du test
-- **Sécurité basique** : Distinction 401 (absent) vs 403 (invalide)
-- **Évolutif** : Facilement remplaçable par JWT/OAuth2
-
-### 5. **Validation avec class-validator**
-- **Validation automatique** : Déclarative sur les DTOs
-- **Erreurs claires** : Messages d'erreur explicites
-- **Type-safe** : Cohérence avec TypeScript
-
-### 6. **Audit logs séparé**
-- **Traçabilité** : Chaque action importante est loggée
-- **Non-bloquant** : Les erreurs d'audit n'impactent pas le flux principal
-- **Historique** : Conservation de l'historique complet par transfert
-
----
-
-## 🚀 Améliorations futures
-
-### Avec plus de temps, j'ajouterais :
-
-#### 1. **Sécurité renforcée**
-- 🔐 Authentification JWT avec refresh tokens
-- 🔒 Rate limiting (contre le spam/DDoS)
-- 🛡 Hashing des API keys en DB
-- 🔑 Gestion multi-clés avec permissions granulaires
-- 📝 CORS configuré selon les environnements
-
-#### 2. **Base de données & Performance**
-- 🐘 Support PostgreSQL avec TypeORM en option
-- ⚡ Redis pour le cache des transferts fréquents
-- 📊 Indexes composés pour les recherches complexes
-- 🔄 Transactions pour garantir la cohérence ACID
-
-#### 3. **Fonctionnalités métier**
-- 💰 Support multi-devises avec taux de change
-- 🔔 Webhooks pour notifier les systèmes externes
-- 📱 Notifications SMS/Email au destinataire
-- 🔁 Système de retry automatique pour les FAILED
-- 📅 Scheduled jobs pour nettoyer les vieux transferts
-- 💳 Intégration avec vrais providers (Wave, Orange Money)
-
-#### 4. **Monitoring & Observabilité**
-- 📈 Intégration Prometheus + Grafana
-- 🔍 Logging structuré (Winston/Pino)
-- 🚨 Alerting sur taux d'échec élevé
-- 📊 Dashboards temps réel
-- 🔬 Distributed tracing (Jaeger/Zipkin)
-
-#### 5. **Tests & Qualité**
-- 🧪 Tests E2E complets
-- 🎭 Tests d'intégration avec DB
-- 📸 Snapshot testing
-- 🔄 Tests de charge (K6/Artillery)
-- 🤖 CI/CD (GitHub Actions)
-
-#### 6. **DevOps & Déploiement**
-- 🐳 Docker Compose complet (app + MongoDB + Redis)
-- ☸️ Kubernetes manifests
-- 🌍 Support multi-environnements (dev/staging/prod)
-- 📦 Versioning de l'API (v1, v2...)
-- 🔄 Blue/Green deployment
-
-#### 7. **Documentation**
-- 📚 OpenAPI 3.1 avec exemples enrichis
-- 🎓 Postman Collection export
-- 📖 Guide d'intégration pour développeurs
-- 🔧 Swagger UI personnalisé
-
-#### 8. **Provider System**
-- 🔌 Adapters séparés par provider (Wave, OM, etc.)
-- ⚖️ Load balancing entre providers
-- 🔄 Fallback automatique si provider down
-- 📊 Monitoring des performances par provider
-
----
-
-## 📊 Structure des données
-
-### Transfer
-```typescript
-{
-  _id: ObjectId,
-  reference: string,           // TRF-20250101-XXXX
-  amount: number,              // Montant en XOF
-  currency: string,            // XOF, EUR, etc.
-  channel: 'WAVE' | 'OM',      // Canal de transfert
-  recipient: {
-    phone: string,
-    name: string
-  },
-  metadata: object,            // Données additionnelles
-  fees: number,                // Calculé automatiquement
-  total: number,               // amount + fees
-  status: TransferStatus,      // État du transfert
-  provider_ref?: string,       // Référence provider si SUCCESS
-  error_code?: string,         // Code erreur si FAILED
-  createdAt: Date,
-  updatedAt: Date
-}
-```
-
-### AuditLog
-```typescript
-{
-  _id: ObjectId,
-  action: AuditAction,         // Type d'action
-  transferId: string,          // Référence au transfert
-  transferReference: string,   // Référence lisible
-  metadata: object,            // Données contextuelles
-  createdAt: Date
-}
+└── main.ts                           # Bootstrap + Swagger
 ```
 
 ---
 
-## 🤝 Contribution
+## Livrables
 
-Projet de test - Pas de contributions externes
+✅ **Repo GitHub** : https://github.com/Babacd/dexchange-transfer-api  
+✅ **Swagger** : http://localhost:3000/docs  
+✅ **README** : Ce fichier  
+✅ **.env.example** : Configuration d'exemple  
+✅ **Tests** : 11 tests unitaires passent
 
 ---
 
-## 📝 Licence
+## Licence
 
 MIT
 
 ---
 
-## 👤 Auteur
-
-Test Backend DEXCHANGE - 2025
-
----
-
-## 📞 Support
-
-Pour toute question, consulter la documentation Swagger : `http://localhost:3000/docs`
+**Contact** : Test Backend DEXCHANGE - 2025
